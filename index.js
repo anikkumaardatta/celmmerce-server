@@ -54,6 +54,13 @@ const run = async () => {
       res.send(cursor);
     });
 
+    app.get("/product", async (req, res) => {
+      const id = req.query.id;
+      const query = { _id: ObjectId(id) };
+      const product = await productsCollection.findOne(query);
+      res.send(product);
+    });
+
     app.get("/products", async (req, res) => {
       const brand = req.query.brand;
       const seller = req.query.seller;
@@ -102,6 +109,18 @@ const run = async () => {
       const product = req.body;
       const products = await productsCollection.insertOne(product);
       res.send(products);
+    });
+
+    app.put("/product", async (req, res) => {
+      const id = req.query.id;
+      const query = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          isAdvertise: true,
+        },
+      };
+      const result = await productsCollection.updateOne(query, updateDoc);
+      res.send(result);
     });
   } finally {
   }
