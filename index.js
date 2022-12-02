@@ -26,10 +26,17 @@ const run = async () => {
     const usersCollection = client.db("celmmerce").collection("users");
     const productsCollection = client.db("celmmerce").collection("products");
     const ordersCollection = client.db("celmmerce").collection("orders");
+    const blogsCollection = client.db("celmmerce").collection("blogs");
     const brandsCollection = client
       .db("celmmerce")
       .collection("brandCategories");
 
+    app.get("blogs", async (req, res) => {
+      const query = {};
+      const cursor = blogsCollection.find(query);
+      const blogs = await cursor.toArray();
+      res.send(blogs);
+    });
     app.get("/users", async (req, res) => {
       const email = req.query.email;
       let query = {};
@@ -166,6 +173,12 @@ const run = async () => {
         },
       };
       const result = await productsCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+    app.delete("/products/delete", async (req, res) => {
+      const productID = req.query.productID;
+      const query = { _id: ObjectId(productID) };
+      const result = await productsCollection.deleteOne(query);
       res.send(result);
     });
   } finally {
