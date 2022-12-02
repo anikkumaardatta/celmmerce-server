@@ -100,11 +100,18 @@ const run = async () => {
       res.send(brands);
     });
     app.get("/orders", async (req, res) => {
-      const query = {};
+      const buyerID = req.query.buyerID;
+      let query = {};
+      if (buyerID) {
+        query = {
+          buyerUID: buyerID,
+        };
+      }
       const cursor = ordersCollection.find(query);
       const orders = await cursor.toArray();
       res.send(orders);
     });
+
     app.get("/jwt", async (req, res) => {
       const email = req.query.email;
       const query = { userEmail: email };
