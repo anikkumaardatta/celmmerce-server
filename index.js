@@ -25,6 +25,7 @@ const run = async () => {
   try {
     const usersCollection = client.db("celmmerce").collection("users");
     const productsCollection = client.db("celmmerce").collection("products");
+    const ordersCollection = client.db("celmmerce").collection("orders");
     const brandsCollection = client
       .db("celmmerce")
       .collection("brandCategories");
@@ -64,6 +65,7 @@ const run = async () => {
     app.get("/products", async (req, res) => {
       const brand = req.query.brand;
       const seller = req.query.seller;
+      const advertised = req.query.advertised;
       let query = {};
       if (brand) {
         query = {
@@ -75,16 +77,33 @@ const run = async () => {
           sellerUID: seller,
         };
       }
+      if (advertised) {
+        query = {};
+      }
       const cursor = productsCollection.find(query);
       const products = await cursor.toArray();
       res.send(products);
     });
+    app.get("/advertisedItems", async (req, res) => {
+      let query = {
+        isAdvertise: true,
+      };
+      const cursor = productsCollection.find(query);
+      const advertisedItems = await cursor.toArray();
+      res.send(advertisedItems);
+    });
 
     app.get("/brands", async (req, res) => {
-      let query = {};
+      const query = {};
       const cursor = brandsCollection.find(query);
       const brands = await cursor.toArray();
       res.send(brands);
+    });
+    app.get("/orders", async (req, res) => {
+      const query = {};
+      const cursor = ordersCollection.find(query);
+      const orders = await cursor.toArray();
+      res.send(orders);
     });
     app.get("/jwt", async (req, res) => {
       const email = req.query.email;
@@ -105,10 +124,17 @@ const run = async () => {
       const users = await usersCollection.insertOne(user);
       res.send(users);
     });
+
     app.post("/products", async (req, res) => {
       const product = req.body;
       const products = await productsCollection.insertOne(product);
       res.send(products);
+    });
+
+    app.post("/orders", async (req, res) => {
+      const order = req.body;
+      const orders = await ordersCollection.insertOne(order);
+      res.send(orders);
     });
 
     app.put("/product", async (req, res) => {
@@ -117,6 +143,19 @@ const run = async () => {
       const updateDoc = {
         $set: {
           isAdvertise: true,
+        },
+      };
+      const result = await productsCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
+    app.put("/productStatus", async (req, res) => {
+      const id = req.query.id;
+      const query = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          isAdvertise: false,
+          isSold: true,
         },
       };
       const result = await productsCollection.updateOne(query, updateDoc);
